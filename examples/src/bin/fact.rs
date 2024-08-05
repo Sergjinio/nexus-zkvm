@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use nexus_rt::{println, Write};
+use nexus_rt::read_from_private_input;
 
 #[nexus_rt::main]
 fn main() {
@@ -15,6 +15,6 @@ fn main() {
             n.saturating_mul(f(n - 1))
         }
     }
-    let n = 12;
-    println!("fact {n} = {}", f(n))
+    let n = read_from_private_input().unwrap_or(3) as u32;
+    let _ = f(n);
 }
