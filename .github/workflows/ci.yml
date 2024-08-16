@@ -7,66 +7,121 @@ on:
       - main
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust Stable Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
   check-fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust Stable Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - run: cargo fmt --all --check
-      - run: cd nova-benches && cargo fmt --check
+      
+      - name: Check Format
+        run: cargo fmt --all --check
+      
+      - name: Check Format in nova-benches
+        run: cd nova-benches && cargo fmt --check
 
   check-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust Stable Toolchain with RISC-V Target
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: riscv32i-unknown-none-elf
-      - run: cargo check --all-features
-      - run: cargo check --all-features --examples
-      - run: cargo check -p example --target=riscv32i-unknown-none-elf
-      - run: cd nova-benches && cargo check --benches
+      
+      - name: Cargo Check (All Features)
+        run: cargo check --all-features
+      
+      - name: Cargo Check (Examples)
+        run: cargo check --all-features --examples
+      
+      - name: Cargo Check (Specific Example)
+        run: cargo check -p example --target=riscv32i-unknown-none-elf
+      
+      - name: Cargo Check (nova-benches)
+        run: cd nova-benches && cargo check --benches
 
   cargo-clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust Stable Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - run: cargo clippy --all-targets --all-features
+      
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features
 
   test:
     needs: check-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust Stable Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - run: cargo test -r --all-features
+      
+      - name: Run Tests
+        run: cargo test -r --all-features
 
   test-smoke:
     needs: check-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: rustup target add riscv32i-unknown-none-elf
-      - run: assets/scripts/smoke.sh examples/src/bin/fib3_profiling.rs
-      - run: assets/scripts/smoke.sh examples/src/bin/hello.rs
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Add RISC-V Target
+        run: rustup target add riscv32i-unknown-none-elf
+      
+      - name: Run Smoke Tests (fib3_profiling)
+        run: assets/scripts/smoke.sh examples/src/bin/fib3_profiling.rs
+      
+      - name: Run Smoke Tests (hello)
+        run: assets/scripts/smoke.sh examples/src/bin/hello.rs
 
   test-sdk:
     needs: check-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: rustup target add riscv32i-unknown-none-elf
-      - run: assets/scripts/test_sdk.sh examples/src/bin/hello.rs
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Add RISC-V Target
+        run: rustup target add riscv32i-unknown-none-elf
+      
+      - name: Run SDK Tests
+        run: assets/scripts/test_sdk.sh examples/src/bin/hello.rs
 
   detect-unused-crate:
     runs-on: ubuntu-latest
     steps:
-      - uses: bnjbvr/cargo-machete@main
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Detect Unused Crates
+        uses: bnjbvr/cargo-machete@main
